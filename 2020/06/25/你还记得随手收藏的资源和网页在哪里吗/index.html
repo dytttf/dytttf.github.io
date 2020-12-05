@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Courier Prime:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"always","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="清理浏览器书签有感而发 前言平时浏览些网站、看些博客、查点问题的时候，总是随手会加个书签。偶尔心血来潮的时候，还会建个目录，收集一系列相关文章、资料。 然而，等你真的碰到了问题的时候，你根本想不起来到书签里、笔记里去找答案。 除非，这个笔记是你自己写的，而非随手收藏的。 网盘里的数T各种视频、文档，根本不会去看。 今天突然看到了自己的书签好乱，整理了一下，发现好多东西都可以删掉了。 删删删某些网站">
+<meta property="og:type" content="article">
+<meta property="og:title" content="你还记得随手收藏的资源和网页在哪里吗">
+<meta property="og:url" content="http://dytttf.com/blog/2020/06/25/%E4%BD%A0%E8%BF%98%E8%AE%B0%E5%BE%97%E9%9A%8F%E6%89%8B%E6%94%B6%E8%97%8F%E7%9A%84%E8%B5%84%E6%BA%90%E5%92%8C%E7%BD%91%E9%A1%B5%E5%9C%A8%E5%93%AA%E9%87%8C%E5%90%97/">
+<meta property="og:site_name" content="Dytttf&#39;s Space">
+<meta property="og:description" content="清理浏览器书签有感而发 前言平时浏览些网站、看些博客、查点问题的时候，总是随手会加个书签。偶尔心血来潮的时候，还会建个目录，收集一系列相关文章、资料。 然而，等你真的碰到了问题的时候，你根本想不起来到书签里、笔记里去找答案。 除非，这个笔记是你自己写的，而非随手收藏的。 网盘里的数T各种视频、文档，根本不会去看。 今天突然看到了自己的书签好乱，整理了一下，发现好多东西都可以删掉了。 删删删某些网站">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-25T15:52:34.000Z">
+<meta property="article:modified_time" content="2020-06-25T15:52:56.275Z">
+<meta property="article:author" content="Dytttf">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://dytttf.com/blog/2020/06/25/%E4%BD%A0%E8%BF%98%E8%AE%B0%E5%BE%97%E9%9A%8F%E6%89%8B%E6%94%B6%E8%97%8F%E7%9A%84%E8%B5%84%E6%BA%90%E5%92%8C%E7%BD%91%E9%A1%B5%E5%9C%A8%E5%93%AA%E9%87%8C%E5%90%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>你还记得随手收藏的资源和网页在哪里吗 | Dytttf's Space</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dytttf's Space</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">There is no one</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="http://dytttf.com/blog/blog/2020/06/25/%E4%BD%A0%E8%BF%98%E8%AE%B0%E5%BE%97%E9%9A%8F%E6%89%8B%E6%94%B6%E8%97%8F%E7%9A%84%E8%B5%84%E6%BA%90%E5%92%8C%E7%BD%91%E9%A1%B5%E5%9C%A8%E5%93%AA%E9%87%8C%E5%90%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Dytttf">
+      <meta itemprop="description" content="https://github.com/dytttf">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dytttf's Space">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          你还记得随手收藏的资源和网页在哪里吗
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-06-25 23:52:34 / Modified: 23:52:56" itemprop="dateCreated datePublished" datetime="2020-06-25T23:52:34+08:00">2020-06-25</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><em>清理浏览器书签有感而发</em></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>平时浏览些网站、看些博客、查点问题的时候，总是随手会加个书签。偶尔心血来潮的时候，还会建个目录，收集一系列相关文章、资料。</p>
+<p>然而，等你真的碰到了问题的时候，你根本想不起来到书签里、笔记里去找答案。</p>
+<p>除非，这个笔记是你自己写的，而非随手收藏的。</p>
+<p>网盘里的数T各种视频、文档，根本不会去看。</p>
+<p>今天突然看到了自己的书签好乱，整理了一下，发现好多东西都可以删掉了。</p>
+<h1 id="删删删"><a href="#删删删" class="headerlink" title="删删删"></a>删删删</h1><h3 id="某些网站的首页"><a href="#某些网站的首页" class="headerlink" title="某些网站的首页"></a>某些网站的首页</h3><blockquote>
+<p>唉、不知道当时为啥要存这个东西，还单独建了个文件夹。难道百度不香吗？</p>
+</blockquote>
+<ul>
+<li>CSDN</li>
+<li>StackOverflow</li>
+<li>SegmentFault</li>
+<li>Ruby</li>
+<li>ubuntu中文论坛</li>
+<li>O’reilly</li>
+<li>WebSpidersScreenScrapers</li>
+<li>小程序</li>
+<li>账号网</li>
+<li>豌豆荚</li>
+<li>图灵</li>
+<li>shadon</li>
+<li>开源中国</li>
+<li></li>
+<li>梦幻西游</li>
+</ul>
+<h3 id="某些已经不需要了的东西"><a href="#某些已经不需要了的东西" class="headerlink" title="某些已经不需要了的东西"></a>某些已经不需要了的东西</h3><ul>
+<li>Sublime的相关教程<blockquote>
+<p>专业编辑器很香。不过Sublime的多行编辑操作很爽，一直在用</p>
+</blockquote>
+</li>
+<li>Vim的相关教程<blockquote>
+<p>曾经也是重度用户，不过现在感觉会简单操作就可以了。</p>
+</blockquote>
+</li>
+<li>WingIDE<blockquote>
+<p>Pycharm香</p>
+</blockquote>
+</li>
+<li>flash</li>
+</ul>
+<h3 id="那些变了的网站"><a href="#那些变了的网站" class="headerlink" title="那些变了的网站"></a>那些变了的网站</h3><blockquote>
+<p>生活不易</p>
+</blockquote>
+<ul>
+<li>伯乐在线竟然改成了财经网站？</li>
+<li>api之家：<a target="_blank" rel="noopener" href="http://www.apihome.cn/">http://www.apihome.cn/</a> 咋成了OneinStack的官网？</li>
+<li><a target="_blank" rel="noopener" href="http://jm.taobao.org/">http://jm.taobao.org/</a> 这个还在更新吗？</li>
+<li>乌云</li>
+<li>百度云盘：由于产品的升级与调整，个人主页关闭并停止提供服务~。</li>
+<li>firebug  停了好久好久了</li>
+</ul>
+<h3 id="那些被下架的资源"><a href="#那些被下架的资源" class="headerlink" title="那些被下架的资源"></a>那些被下架的资源</h3><ul>
+<li>51CTO之前看的几本书的链接都失效了</li>
+<li>淘宝收藏的几个卖小号的链接也都没用了</li>
+</ul>
+<h3 id="某些资源聚合站"><a href="#某些资源聚合站" class="headerlink" title="某些资源聚合站"></a>某些资源聚合站</h3><blockquote>
+<p>收藏了很多很杂的东西，现在看起来，其实没啥卵用，如果一个东西你不去用起来的话，学习效率很低不说，很快就忘了。根本没必要收藏这些乱七八糟的东西，等用的时候搜索就好了</p>
+</blockquote>
+<ul>
+<li>比如书册网、实验楼</li>
+</ul>
+<h3 id="不明所以"><a href="#不明所以" class="headerlink" title="不明所以"></a>不明所以</h3><blockquote>
+<p>收藏的目的已经想不起来了，而且现在看起来卵用没有</p>
+</blockquote>
+<ul>
+<li>几个搜狗微信的公众号的链接。。。</li>
+<li>几个知乎的问题</li>
+</ul>
+<h1 id="吐槽一下"><a href="#吐槽一下" class="headerlink" title="吐槽一下"></a>吐槽一下</h1><ul>
+<li>CSDN<blockquote>
+<p>曾经真的以为是国内最大的技术博客网站。后来发现里面好多乱七八糟的文章（格式乱）。而且好多从别的站爬过来的文章。还有，啥时候CSDN能改下UI，不难看吗？？？</p>
+</blockquote>
+</li>
+<li>百度云盘<blockquote>
+<p>竟然有个内容商城：<a target="_blank" rel="noopener" href="https://pan.baidu.com/mall/home?from=panhome">https://pan.baidu.com/mall/home?from=panhome</a> 是在下孤陋寡闻了</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>收藏应该是收藏那些值得收藏的东西，并且当以后用到的时候可以很快触达。</p>
+<p>那些可以被搜索引擎替代的东西，就不要来占空间了。附：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/20161362">如何用好搜索引擎</a></p>
+<p>还是自己写的笔记印象会更深刻一些。自己的笔记，可以按照自己的思维方式把资源重新整合，以后翻查也可以更快的唤起记忆。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/blog/2020/06/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A4%B1%E8%B4%A5%E7%9A%84K8S%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/" rel="next" title="记一次失败的K8S安装部署">
+                  <i class="fa fa-chevron-left"></i> 记一次失败的K8S安装部署
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/blog/2020/07/04/mysql%E7%94%A8%E6%88%B7%E5%8F%8A%E6%9D%83%E9%99%90%E5%A4%8D%E5%88%B6/" rel="prev" title="mysql用户及权限复制">
+                  mysql用户及权限复制 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%A0%E5%88%A0%E5%88%A0"><span class="nav-number">2.</span> <span class="nav-text">删删删</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%90%E4%BA%9B%E7%BD%91%E7%AB%99%E7%9A%84%E9%A6%96%E9%A1%B5"><span class="nav-number">2.0.1.</span> <span class="nav-text">某些网站的首页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%90%E4%BA%9B%E5%B7%B2%E7%BB%8F%E4%B8%8D%E9%9C%80%E8%A6%81%E4%BA%86%E7%9A%84%E4%B8%9C%E8%A5%BF"><span class="nav-number">2.0.2.</span> <span class="nav-text">某些已经不需要了的东西</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%82%A3%E4%BA%9B%E5%8F%98%E4%BA%86%E7%9A%84%E7%BD%91%E7%AB%99"><span class="nav-number">2.0.3.</span> <span class="nav-text">那些变了的网站</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%82%A3%E4%BA%9B%E8%A2%AB%E4%B8%8B%E6%9E%B6%E7%9A%84%E8%B5%84%E6%BA%90"><span class="nav-number">2.0.4.</span> <span class="nav-text">那些被下架的资源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%90%E4%BA%9B%E8%B5%84%E6%BA%90%E8%81%9A%E5%90%88%E7%AB%99"><span class="nav-number">2.0.5.</span> <span class="nav-text">某些资源聚合站</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E6%98%8E%E6%89%80%E4%BB%A5"><span class="nav-number">2.0.6.</span> <span class="nav-text">不明所以</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%90%E6%A7%BD%E4%B8%80%E4%B8%8B"><span class="nav-number">3.</span> <span class="nav-text">吐槽一下</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E8%AE%B0"><span class="nav-number">4.</span> <span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Dytttf</p>
+  <div class="site-description" itemprop="description">https://github.com/dytttf</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dytttf" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;dytttf" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/blog/duanchiyigaofei@gmail.com" title="E-Mail → duanchiyigaofei@gmail.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Dytttf</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v5.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/pisces.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

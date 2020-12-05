@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Courier Prime:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"always","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="前言某日，准备良久后，开始入K8S的坑。以下经历，惨不忍睹。 K8S 安装K8S官方安装方式比较繁琐，有大神出了一键部署包。https:&#x2F;&#x2F;github.com&#x2F;fanux&#x2F;sealos。 安装最新版的K8S免费且简单。想安装其他版本的话，就收费了。离线安装包50一位。 想着自己只是测试，然后客户那边是v1.17。我装个v1.18的应该没啥问题，于是就直接开搞。安装无比顺利，两台机器，master">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次失败的K8S安装部署">
+<meta property="og:url" content="http://dytttf.com/blog/2020/06/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A4%B1%E8%B4%A5%E7%9A%84K8S%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/">
+<meta property="og:site_name" content="Dytttf&#39;s Space">
+<meta property="og:description" content="前言某日，准备良久后，开始入K8S的坑。以下经历，惨不忍睹。 K8S 安装K8S官方安装方式比较繁琐，有大神出了一键部署包。https:&#x2F;&#x2F;github.com&#x2F;fanux&#x2F;sealos。 安装最新版的K8S免费且简单。想安装其他版本的话，就收费了。离线安装包50一位。 想着自己只是测试，然后客户那边是v1.17。我装个v1.18的应该没啥问题，于是就直接开搞。安装无比顺利，两台机器，master">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-25T13:22:07.000Z">
+<meta property="article:modified_time" content="2020-06-25T13:22:39.587Z">
+<meta property="article:author" content="Dytttf">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://dytttf.com/blog/2020/06/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A4%B1%E8%B4%A5%E7%9A%84K8S%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>记一次失败的K8S安装部署 | Dytttf's Space</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dytttf's Space</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">There is no one</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="http://dytttf.com/blog/blog/2020/06/25/%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%A4%B1%E8%B4%A5%E7%9A%84K8S%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Dytttf">
+      <meta itemprop="description" content="https://github.com/dytttf">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dytttf's Space">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一次失败的K8S安装部署
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-06-25 21:22:07 / Modified: 21:22:39" itemprop="dateCreated datePublished" datetime="2020-06-25T21:22:07+08:00">2020-06-25</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>某日，准备良久后，开始入K8S的坑。以下经历，惨不忍睹。</p>
+<h2 id="K8S-安装"><a href="#K8S-安装" class="headerlink" title="K8S 安装"></a>K8S 安装</h2><p>K8S官方安装方式比较繁琐，有大神出了一键部署包。<a target="_blank" rel="noopener" href="https://github.com/fanux/sealos。">https://github.com/fanux/sealos。</a></p>
+<p>安装最新版的K8S免费且简单。想安装其他版本的话，就收费了。离线安装包50一位。</p>
+<p>想着自己只是测试，然后客户那边是v1.17。我装个v1.18的应该没啥问题，于是就直接开搞。安装无比顺利，两台机器，master是自己的开发机：ubuntu18.04。node新开了一台centos7.4。（当时没多想，后来坑死了）</p>
+<h2 id="服务部署"><a href="#服务部署" class="headerlink" title="服务部署"></a>服务部署</h2><p>应用很简单。前后端两个Deployment、前后端各一个Service, 主要为了能在外部访问。<br>前期不太熟悉Service的部署方式，略微耗费了点时间，也还好，没啥大问题。</p>
+<p>然后开心的启动服务，一切正常。 然后扭头搞别的事情去了。</p>
+<h2 id="问题出现"><a href="#问题出现" class="headerlink" title="问题出现"></a>问题出现</h2><p>过了大概1个小时？突然发现服务访问不了了。在Service里配置了使用NodePort的方式，因此正常情况下我可以用任意一台node或master的IP来访问服务，但现在的情况是master可以，node不行。</p>
+<p>一番苦思冥想，各种测试，外加谷歌大法，终于找到了个大神的文章：<a target="_blank" rel="noopener" href="http://www.mydlq.club/article/78/。">http://www.mydlq.club/article/78/。</a></p>
+<p>恍然大悟，原来是v1.18的版本太新了，需要升级linux内核才能匹配。不过升级内核太麻烦，干脆换系统吧。于是一顿操作把node节点系统换成了centos8.1。这下内核版本没问题了，重启服务，发现两个节点访问都没问题。</p>
+<p>很开心。</p>
+<h2 id="新的问题"><a href="#新的问题" class="headerlink" title="新的问题"></a>新的问题</h2><p>过了30秒吧，突然发现master节点的服务不能访问了。node节点的访问也会报500。</p>
+<p>进入pod中发现无法访问master的ip，无法访问任何外网。</p>
+<p>于是又开始了疯狂DEBUG, 1个小时后。。。</p>
+<p>会不会是因为master和node的系统不一致？？？</p>
+<p>于是一通操作，将node改成ubuntu18.04，重启服务。测试、等待、测试、等待。</p>
+<p>终于，没问题了。</p>
+<h2 id="心情是这样的"><a href="#心情是这样的" class="headerlink" title="心情是这样的"></a>心情是这样的</h2><p>欲哭无泪，没 人 说 节 点 的 系 统 必 须 得 一 致 吧！！！</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/blog/2020/05/31/HTTP%E7%8A%B6%E6%80%81%E7%A0%81%E4%B8%8E%E7%88%AC%E8%99%AB/" rel="next" title="HTTP状态码与爬虫">
+                  <i class="fa fa-chevron-left"></i> HTTP状态码与爬虫
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/blog/2020/06/25/%E4%BD%A0%E8%BF%98%E8%AE%B0%E5%BE%97%E9%9A%8F%E6%89%8B%E6%94%B6%E8%97%8F%E7%9A%84%E8%B5%84%E6%BA%90%E5%92%8C%E7%BD%91%E9%A1%B5%E5%9C%A8%E5%93%AA%E9%87%8C%E5%90%97/" rel="prev" title="你还记得随手收藏的资源和网页在哪里吗">
+                  你还记得随手收藏的资源和网页在哪里吗 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#K8S-%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.</span> <span class="nav-text">K8S 安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2"><span class="nav-number">1.2.</span> <span class="nav-text">服务部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%87%BA%E7%8E%B0"><span class="nav-number">1.3.</span> <span class="nav-text">问题出现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.4.</span> <span class="nav-text">新的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BF%83%E6%83%85%E6%98%AF%E8%BF%99%E6%A0%B7%E7%9A%84"><span class="nav-number">1.5.</span> <span class="nav-text">心情是这样的</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Dytttf</p>
+  <div class="site-description" itemprop="description">https://github.com/dytttf</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dytttf" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;dytttf" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/blog/duanchiyigaofei@gmail.com" title="E-Mail → duanchiyigaofei@gmail.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Dytttf</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v5.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/pisces.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

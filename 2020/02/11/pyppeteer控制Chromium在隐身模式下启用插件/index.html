@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Courier Prime:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"always","offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="基础启用隐身模式123456789101112from pyppeteer import launchasync def start_browser():    browser &#x3D; await launch(**&amp;#123;&quot;headless&quot;: False&amp;#125;)    browser_context &#x3D; await browser.createIncognitoBro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pyppeteer控制Chromium在隐身模式下启用插件">
+<meta property="og:url" content="http://dytttf.com/blog/2020/02/11/pyppeteer%E6%8E%A7%E5%88%B6Chromium%E5%9C%A8%E9%9A%90%E8%BA%AB%E6%A8%A1%E5%BC%8F%E4%B8%8B%E5%90%AF%E7%94%A8%E6%8F%92%E4%BB%B6/">
+<meta property="og:site_name" content="Dytttf&#39;s Space">
+<meta property="og:description" content="基础启用隐身模式123456789101112from pyppeteer import launchasync def start_browser():    browser &#x3D; await launch(**&amp;#123;&quot;headless&quot;: False&amp;#125;)    browser_context &#x3D; await browser.createIncognitoBro">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-02-11T13:37:23.000Z">
+<meta property="article:modified_time" content="2020-02-11T13:37:49.000Z">
+<meta property="article:author" content="Dytttf">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://dytttf.com/blog/2020/02/11/pyppeteer%E6%8E%A7%E5%88%B6Chromium%E5%9C%A8%E9%9A%90%E8%BA%AB%E6%A8%A1%E5%BC%8F%E4%B8%8B%E5%90%AF%E7%94%A8%E6%8F%92%E4%BB%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>pyppeteer控制Chromium在隐身模式下启用插件 | Dytttf's Space</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dytttf's Space</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">There is no one</p>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-cn">
+    <link itemprop="mainEntityOfPage" href="http://dytttf.com/blog/blog/2020/02/11/pyppeteer%E6%8E%A7%E5%88%B6Chromium%E5%9C%A8%E9%9A%90%E8%BA%AB%E6%A8%A1%E5%BC%8F%E4%B8%8B%E5%90%AF%E7%94%A8%E6%8F%92%E4%BB%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Dytttf">
+      <meta itemprop="description" content="https://github.com/dytttf">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dytttf's Space">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          pyppeteer控制Chromium在隐身模式下启用插件
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-02-11 21:37:23 / Modified: 21:37:49" itemprop="dateCreated datePublished" datetime="2020-02-11T21:37:23+08:00">2020-02-11</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h2><h4 id="启用隐身模式"><a href="#启用隐身模式" class="headerlink" title="启用隐身模式"></a>启用隐身模式</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pyppeteer <span class="keyword">import</span> launch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">start_browser</span>():</span></span><br><span class="line">    browser = <span class="keyword">await</span> launch(**&#123;<span class="string">&quot;headless&quot;</span>: <span class="literal">False</span>&#125;)</span><br><span class="line">    browser_context = <span class="keyword">await</span> browser.createIncognitoBrowserContext()</span><br><span class="line">    page = <span class="keyword">await</span> browser_context.newPage()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">&quot;http://www.baidu.com&quot;</span>)</span><br><span class="line">    <span class="keyword">await</span> browser.close()</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4 id="非隐身模式启用插件"><a href="#非隐身模式启用插件" class="headerlink" title="非隐身模式启用插件"></a>非隐身模式启用插件</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pyppeteer <span class="keyword">import</span> launch</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">start_browser</span>():</span></span><br><span class="line">    chrome_extension_path = <span class="string">&quot;插件所在目录&quot;</span></span><br><span class="line">    args = [</span><br><span class="line">        <span class="string">&quot;--load-extension=&#123;&#125;&quot;</span>.<span class="built_in">format</span>(chrome_extension_path),</span><br><span class="line">        <span class="string">&quot;--disable-extensions-except=&#123;&#125;&quot;</span>.<span class="built_in">format</span>(chrome_extension_path),</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    browser = <span class="keyword">await</span> launch(**&#123;<span class="string">&quot;headless&quot;</span>: <span class="literal">False</span>, <span class="string">&quot;args&quot;</span>: args&#125;)</span><br><span class="line">    page = <span class="keyword">await</span> browser.newPage()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">&quot;http://www.baidu.com&quot;</span>)</span><br><span class="line">    <span class="keyword">await</span> browser.close()</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><p>如果是非隐身模式启用插件的话，上面的代码就可以了。但很蛋疼的是，有个场景必须得在隐身模式下运行，还需要插件。如果是人为操作的话，启用步骤如下：</p>
+<ol>
+<li>打开插件管理页面 chrome://extensions/</li>
+<li>找到需要启动的插件，点击详细信息，进入插件详情。</li>
+<li>在详情中寻找: 在无痕模式下启用的选项并勾选</li>
+</ol>
+<p>然后就可以在隐身模式下使用了。</p>
+<p>BUT，我的目的是自动隐身模式下启用插件。Google大法开始启用。。。<br>一个小时后。。。WTF，反正我是没找到正常的实现方式，貌似pyppeteer不支持，不知道是不是有什么隐藏的chrome参数能用的，但找起来太费劲了，放弃。</p>
+<p>其实在Google过程中也找到了一个办法，只是不那么优雅而已。其实很简单，就是把上面人为操作的步骤自动化一下。</p>
+<p>代码并不是很复杂，不过在实现过程中还是学到了点新东西的。</p>
+<p>代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> asyncio</span><br><span class="line"><span class="keyword">from</span> pyppeteer.browser <span class="keyword">import</span> Browser</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">enable_extension_for_incognito</span>(<span class="params">browser: Browser, extension_name: <span class="built_in">str</span></span>) -&gt; bool:</span></span><br><span class="line">    <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        在隐身模式下启用指定插件</span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        extension_name: 插件名称</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># 新开非隐身窗口并打开扩展程序页面</span></span><br><span class="line">    page = <span class="keyword">await</span> browser.newPage()</span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">&quot;chrome://extensions/&quot;</span>)</span><br><span class="line">    <span class="comment"># 执行js代码获取指定的扩展id</span></span><br><span class="line">    get_eid_js = (</span><br><span class="line">        <span class="string">&quot;&quot;&quot;() =&gt; &#123;</span></span><br><span class="line"><span class="string">        var extension_id;</span></span><br><span class="line"><span class="string">        document.querySelector(&quot;extensions-manager&quot;).shadowRoot</span></span><br><span class="line"><span class="string">        .querySelector(&quot;extensions-item-list&quot;).shadowRoot</span></span><br><span class="line"><span class="string">        .querySelectorAll(&quot;extensions-item&quot;).forEach(function (e) &#123;</span></span><br><span class="line"><span class="string">            var e_name = e.shadowRoot.querySelector(&quot;#name&quot;).textContent.trim();</span></span><br><span class="line"><span class="string">            if (e_name == &quot;%s&quot;) &#123;</span></span><br><span class="line"><span class="string">                extension_id = e.getAttribute(&quot;id&quot;)</span></span><br><span class="line"><span class="string">            &#125;</span></span><br><span class="line"><span class="string">        &#125;)</span></span><br><span class="line"><span class="string">        return extension_id</span></span><br><span class="line"><span class="string">    &#125;&quot;&quot;&quot;</span></span><br><span class="line">        % extension_name</span><br><span class="line">    )</span><br><span class="line">    extension_id = <span class="keyword">await</span> page.evaluate(get_eid_js)</span><br><span class="line">    <span class="keyword">await</span> asyncio.sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># 进入扩展详情页面</span></span><br><span class="line">    <span class="keyword">await</span> page.goto(<span class="string">&quot;chrome://extensions/?id=&#123;&#125;&quot;</span>.<span class="built_in">format</span>(extension_id))</span><br><span class="line">    <span class="comment"># 判断插件是否启用</span></span><br><span class="line">    get_extension_status_js = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">                    () =&gt; &#123;</span></span><br><span class="line"><span class="string">                    return document.querySelector(&quot;extensions-manager&quot;).shadowRoot</span></span><br><span class="line"><span class="string">                    .querySelector(&quot;extensions-detail-view&quot;).shadowRoot</span></span><br><span class="line"><span class="string">                    .querySelector(&quot;extensions-toggle-row#allow-incognito&quot;).shadowRoot</span></span><br><span class="line"><span class="string">                    .querySelector(&quot;#crToggle&quot;).getAttribute(&quot;aria-pressed&quot;)</span></span><br><span class="line"><span class="string">                    &#125;</span></span><br><span class="line"><span class="string">                    &quot;&quot;&quot;</span></span><br><span class="line">    r = <span class="keyword">await</span> page.evaluate(get_extension_status_js)</span><br><span class="line">    <span class="keyword">if</span> r != <span class="string">&quot;true&quot;</span>:</span><br><span class="line">        <span class="comment"># 点击在无痕模式下启用</span></span><br><span class="line">        click_enable_js = <span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">        () =&gt; &#123;document.querySelector(&quot;extensions-manager&quot;).shadowRoot</span></span><br><span class="line"><span class="string">        .querySelector(&quot;extensions-detail-view&quot;).shadowRoot</span></span><br><span class="line"><span class="string">        .querySelector(&quot;extensions-toggle-row#allow-incognito&quot;).shadowRoot</span></span><br><span class="line"><span class="string">        .querySelector(&quot;#crToggle&quot;).shadowRoot</span></span><br><span class="line"><span class="string">        .querySelector(&quot;button&quot;).click()&#125;</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">await</span> page.evaluate(click_enable_js)</span><br><span class="line">        <span class="keyword">await</span> asyncio.sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="comment"># 确认是否启用成功</span></span><br><span class="line">    r = <span class="keyword">await</span> page.evaluate(get_extension_status_js)</span><br><span class="line">    <span class="keyword">assert</span> r == <span class="string">&quot;true&quot;</span></span><br><span class="line">    <span class="keyword">await</span> page.close()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br></pre></td></tr></table></figure>
+
+<p>需要注意的地方有两个：</p>
+<ol>
+<li>shadowRoot这个东西第一次遇到。。。</li>
+<li>浏览器有记忆功能。如果你已经启用了某个插件，那么之后再打开的时候插件就已经是启用状态了。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/blog/2020/02/11/%E6%8E%A7%E5%88%B6%E5%AD%97%E7%AC%A6%E6%A6%82%E8%BF%B0-%E4%BB%A5%E5%8F%8A%E7%A7%BB%E9%99%A4/" rel="next" title="控制字符概述-以及移除">
+                  <i class="fa fa-chevron-left"></i> 控制字符概述-以及移除
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/blog/2020/02/22/Github%E6%90%9C%E7%B4%A2%E9%82%A3%E4%BA%9B%E4%BA%8B/" rel="prev" title="Github搜索那些事">
+                  Github搜索那些事 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80"><span class="nav-number">1.</span> <span class="nav-text">基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E9%9A%90%E8%BA%AB%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.0.1.</span> <span class="nav-text">启用隐身模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9D%9E%E9%9A%90%E8%BA%AB%E6%A8%A1%E5%BC%8F%E5%90%AF%E7%94%A8%E6%8F%92%E4%BB%B6"><span class="nav-number">1.0.2.</span> <span class="nav-text">非隐身模式启用插件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AD%A3%E6%96%87"><span class="nav-number">2.</span> <span class="nav-text">正文</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Dytttf</p>
+  <div class="site-description" itemprop="description">https://github.com/dytttf</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dytttf" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;dytttf" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/blog/duanchiyigaofei@gmail.com" title="E-Mail → duanchiyigaofei@gmail.com"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Dytttf</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v5.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.5.0
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/pisces.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
