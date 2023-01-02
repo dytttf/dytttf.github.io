@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Courier+Prime:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"www.dytttf.com","root":"/","images":"/images","scheme":"Gemini","version":"8.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null,"activeClass":"utterances"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="注意事项修改中转服务器上的 sshd 服务配置项：GatewayPorts yes 这样当使用 -R 参数进行转发时中转服务器会监听 0.0.0.0 而不是 127.0.0.1 基本用法1、将 A 机器的某个端口映射到 B 机器的某个端口 例如:  1ssh -f -N -R 0.0.0.0:80:0.0.0.0:80 root@remote_ip  此命令会将本地机器的 80 端口映射到远程服务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSH用于隧道代理的一些场景">
+<meta property="og:url" content="http://www.dytttf.com/2022/02/07/SSH%E7%94%A8%E4%BA%8E%E9%9A%A7%E9%81%93%E4%BB%A3%E7%90%86%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9C%BA%E6%99%AF/">
+<meta property="og:site_name" content="Dytttf&#39;s Space">
+<meta property="og:description" content="注意事项修改中转服务器上的 sshd 服务配置项：GatewayPorts yes 这样当使用 -R 参数进行转发时中转服务器会监听 0.0.0.0 而不是 127.0.0.1 基本用法1、将 A 机器的某个端口映射到 B 机器的某个端口 例如:  1ssh -f -N -R 0.0.0.0:80:0.0.0.0:80 root@remote_ip  此命令会将本地机器的 80 端口映射到远程服务">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-02-07T09:15:26.000Z">
+<meta property="article:modified_time" content="2022-02-07T09:15:26.000Z">
+<meta property="article:author" content="Dytttf">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://www.dytttf.com/2022/02/07/SSH%E7%94%A8%E4%BA%8E%E9%9A%A7%E9%81%93%E4%BB%A3%E7%90%86%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9C%BA%E6%99%AF/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://www.dytttf.com/2022/02/07/SSH%E7%94%A8%E4%BA%8E%E9%9A%A7%E9%81%93%E4%BB%A3%E7%90%86%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9C%BA%E6%99%AF/","path":"2022/02/07/SSH用于隧道代理的一些场景/","title":"SSH用于隧道代理的一些场景"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SSH用于隧道代理的一些场景 | Dytttf's Space</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Dytttf's Space</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">There is no one</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">1.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">基本用法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">案例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B1%EF%BC%9A%E4%BA%91%E6%89%8B%E6%9C%BA%E8%B5%B0%E6%9C%AC%E5%9C%B0-fiddler-%E4%BB%A3%E7%90%86"><span class="nav-number">3.0.1.</span> <span class="nav-text">案例1：云手机走本地 fiddler 代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B2%EF%BC%9A%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5%E4%BA%91%E6%89%8B%E6%9C%BA%E7%9A%84-frida-%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.0.2.</span> <span class="nav-text">案例2：远程连接云手机的 frida 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B3%EF%BC%9A%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5%E4%BA%91%E6%89%8B%E6%9C%BA%E7%9A%84-ssh-%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.0.3.</span> <span class="nav-text">案例3：远程连接云手机的 ssh 服务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9A%A7%E9%81%93%E7%A8%B3%E5%AE%9A%E6%80%A7"><span class="nav-number">4.</span> <span class="nav-text">隧道稳定性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#socks-%E4%BB%A3%E7%90%86%E5%BA%94%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">socks 代理应用</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Dytttf</p>
+  <div class="site-description" itemprop="description">https://github.com/dytttf</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll site-overview-item animated">
+    <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://kalacloud.com/" title="https:&#x2F;&#x2F;kalacloud.com" rel="noopener" target="_blank">卡拉云低代码工具</a>
+        </li>
+    </ul>
+  </div>
+
+          </div>
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="Back to top">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+
+  <a href="https://github.com/dytttf" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://www.dytttf.com/2022/02/07/SSH%E7%94%A8%E4%BA%8E%E9%9A%A7%E9%81%93%E4%BB%A3%E7%90%86%E7%9A%84%E4%B8%80%E4%BA%9B%E5%9C%BA%E6%99%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Dytttf">
+      <meta itemprop="description" content="https://github.com/dytttf">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dytttf's Space">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SSH用于隧道代理的一些场景
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2022-02-07 17:15:26" itemprop="dateCreated datePublished" datetime="2022-02-07T17:15:26+08:00">2022-02-07</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h1><p><strong>修改中转服务器上的 sshd 服务配置项：GatewayPorts yes 这样当使用 -R 参数进行转发时中转服务器会监听 0.0.0.0 而不是 127.0.0.1</strong></p>
+<h1 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h1><p>1、将 A 机器的某个端口映射到 B 机器的某个端口</p>
+<p>例如: </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -f -N -R 0.0.0.0:80:0.0.0.0:80 root@remote_ip</span><br></pre></td></tr></table></figure>
+
+<p>此命令会将本地机器的 80 端口映射到远程服务器（1.1.1.1）的 80 端口。当别人访问远程服务器的 80 端口时，流量就会被转发到本地的 80端口。</p>
+<p>参数解析：</p>
+<ul>
+<li><p>-R remote_ip:remote_port:local_ip:local_port 当不指定本地IP和端口时，remote_ip:remote_port 将会表现为 socks4&#x2F;5代理</p>
+</li>
+<li><p>-f 使ssh命令后台运行</p>
+</li>
+<li><p>-N Do not execute a remote command.  This is useful for just forwarding ports.</p>
+</li>
+</ul>
+<p>2、启动 socks 代理服务</p>
+<p>在本地启动 socks代理：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -N -D 0.0.0.0:1080 root@127.0.0.1</span><br></pre></td></tr></table></figure>
+
+
+
+<p>3、SSH 关键参数：</p>
+<ul>
+<li><p>-R：将远程的流量接过来</p>
+</li>
+<li><p>-L：将自己的流量转发出去</p>
+</li>
+</ul>
+<h1 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h1><h3 id="案例1：云手机走本地-fiddler-代理"><a href="#案例1：云手机走本地-fiddler-代理" class="headerlink" title="案例1：云手机走本地 fiddler 代理"></a>案例1：云手机走本地 fiddler 代理</h3><p>准备：</p>
+<p>1、一台有公网 IP 的服务器</p>
+<p>2、自己的电脑能够通过 ssh 访问 1 的服务器</p>
+<p>步骤：</p>
+<p>1、本地启动 fiddler</p>
+<p>2、本地使用 ssh 将本地 8889 端口（fiddler 端口）映射到服务器的 8889 端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -N -R 0.0.0.0:8889:127.0.0.1:8889 root@remote_ip</span><br></pre></td></tr></table></figure>
+
+<p>3、云手机增加代理：ip 为服务器的公网 ip，端口为 8889</p>
+<p>可能的问题：</p>
+<p>1、使用不当会造成本地 tcp 连接过多，卡死代理</p>
+<p>一句话总结：将有公网IP的服务器的端口流量转发到本地电脑</p>
+<h3 id="案例2：远程连接云手机的-frida-服务"><a href="#案例2：远程连接云手机的-frida-服务" class="headerlink" title="案例2：远程连接云手机的 frida 服务"></a>案例2：远程连接云手机的 frida 服务</h3><p>准备：</p>
+<p>1、云手机开启 frida-server, 端口为 27042</p>
+<p>2、云手机可运行 ssh </p>
+<p>3、一台有公网 ip 的服务器 A</p>
+<p>步骤：</p>
+<p>1、云手机 ssh 公钥放到服务器 A 上</p>
+<p>2、将云手机的端口映射到服务器 A 上</p>
+<p>例如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p 22 -N -R 0.0.0.0:27042:127.0.0.1:27042 root@A</span><br></pre></td></tr></table></figure>
+
+<p>3、本地通过服务器 A 的 ip:27042 访问云手机的 frida-server</p>
+<p>一句话总结：将访问具有公网IP的服务器的流量转发到云手机，转发行为发起人是云手机</p>
+<h3 id="案例3：远程连接云手机的-ssh-服务"><a href="#案例3：远程连接云手机的-ssh-服务" class="headerlink" title="案例3：远程连接云手机的 ssh 服务"></a>案例3：远程连接云手机的 ssh 服务</h3><p>准备：</p>
+<p>1、云手机可运行 ssh </p>
+<p>2、一台有公网 ip 的服务器 A</p>
+<p>步骤：</p>
+<p>1、云手机 ssh 公钥放到服务器 A 上</p>
+<p>2、云手机将自己的 22 端口映射到服务器 A 的 8022 端口 </p>
+<p>例如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p 22 -NR 0.0.0.0:8022:127.0.0.1:22 root@A_ip</span><br></pre></td></tr></table></figure>
+
+<p>3、本地通过服务器ip_port访问云手机</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p 8022 root@A_ip</span><br></pre></td></tr></table></figure>
+
+<p>一句话总结：将访问具有公网IP的服务器的流量转发到云手机，转发行为发起人是云手机</p>
+<h1 id="隧道稳定性"><a href="#隧道稳定性" class="headerlink" title="隧道稳定性"></a>隧道稳定性</h1><p>SSH 隧道在网络波动的情况下会断掉，所以需要有守护进程来保证断掉重连，推荐使用 autossh</p>
+<p>autossh 只能设置免密登录，否则 autossh 不能运行，因为自动重连的时候如果没有免密，是没办法输入密码的</p>
+<p>用法参见 autossh 文档</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">autossh -f -M 0 [SSH OPTIONS]</span><br></pre></td></tr></table></figure>
+
+<p>某些时候会出现 ssh 链接仍在，但端口转发失败的情况，此时 autossh 不会自动重启 ssh，可配合定时任务，定时 kill ssh 进程，然后 autossh 会进行重启。</p>
+<h1 id="socks-代理应用"><a href="#socks-代理应用" class="headerlink" title="socks 代理应用"></a>socks 代理应用</h1><p>案例1: </p>
+<p>当公司仅允许通过jumpserver访问服务器，并且禁止了 vpn 的 22 端口时:</p>
+<ol>
+<li><p>在服务器上启动代理 ssh -p22 -fqND 0.0.0.0:6565 <a href="mailto:&#x72;&#x6f;&#x6f;&#x74;&#x40;&#x31;&#50;&#55;&#x2e;&#x30;&#46;&#48;&#x2e;&#49;">&#x72;&#x6f;&#x6f;&#x74;&#x40;&#x31;&#50;&#55;&#x2e;&#x30;&#46;&#48;&#x2e;&#49;</a></p>
+</li>
+<li><p>本地配合 ProxyCommand</p>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -o ProxyCommand=&#x27;nc -X 5 -x 10.40.34.248:6565 %h %p&#x27; root@remote_ip</span><br></pre></td></tr></table></figure>
+
+
+
+<p>案例2:</p>
+<p>云厂商的服务器公网 IP 都是非住宅类的，而某些应用或服务限制了此类IP，此时可以搭建代理配合 proxifier 使服务器流量走本地。</p>
+<p>如下命令，可以在本地启动一个  socks5 代理 监听8880，并将远程机器的 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -N -R 0.0.0.0:8889 root@remote_ip</span><br></pre></td></tr></table></figure>
+<p>将本地端口映射到远程服务器端口， 使远程服务器可通过本地网络上网</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/01/24/%E6%90%AD%E5%BB%BA-MinIO-Gateway-%E7%9A%84%E4%B8%80%E7%82%B9%E7%82%B9%E9%97%AE%E9%A2%98/" rel="prev" title="搭建 MinIO Gateway 的一点点问题">
+                  <i class="fa fa-chevron-left"></i> 搭建 MinIO Gateway 的一点点问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/05/11/MAC%E8%BF%9C%E7%A8%8Bwindows%E9%81%87%E5%88%B0%E7%9A%84%E4%B8%80%E4%BA%9B%E9%97%AE%E9%A2%98/" rel="next" title="MAC远程windows遇到的一些问题">
+                  MAC远程windows遇到的一些问题 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备2021028637号 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Dytttf</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"dytttf/dytttf.github.io","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

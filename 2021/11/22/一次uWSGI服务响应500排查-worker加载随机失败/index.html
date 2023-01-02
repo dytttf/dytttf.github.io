@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Courier+Prime:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"www.dytttf.com","root":"/","images":"/images","scheme":"Gemini","version":"8.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":false,"nav":null,"activeClass":"utterances"},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="背景在一次线上问题排查中，发现 uWSGI 在某些情况下，会出现假僵尸进程的现象。 问题描述服务部署很简单，常规的 Django + uWSGI 模式。 uWSGI 配置如下： 123456[uwsgi]http &#x3D; :8888processes &#x3D; 8threads &#x3D; 1master &#x3D; truelazy-apps &#x3D; true  在 uWSGI 的访问日志中，会夹杂一些 500 的响应，但">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一次uWSGI服务响应500排查 - worker加载随机失败">
+<meta property="og:url" content="http://www.dytttf.com/2021/11/22/%E4%B8%80%E6%AC%A1uWSGI%E6%9C%8D%E5%8A%A1%E5%93%8D%E5%BA%94500%E6%8E%92%E6%9F%A5-worker%E5%8A%A0%E8%BD%BD%E9%9A%8F%E6%9C%BA%E5%A4%B1%E8%B4%A5/">
+<meta property="og:site_name" content="Dytttf&#39;s Space">
+<meta property="og:description" content="背景在一次线上问题排查中，发现 uWSGI 在某些情况下，会出现假僵尸进程的现象。 问题描述服务部署很简单，常规的 Django + uWSGI 模式。 uWSGI 配置如下： 123456[uwsgi]http &#x3D; :8888processes &#x3D; 8threads &#x3D; 1master &#x3D; truelazy-apps &#x3D; true  在 uWSGI 的访问日志中，会夹杂一些 500 的响应，但">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://images.dytttf.com/images/blog/202111222255600.png">
+<meta property="article:published_time" content="2021-11-22T14:15:01.000Z">
+<meta property="article:modified_time" content="2021-11-22T14:15:01.000Z">
+<meta property="article:author" content="Dytttf">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.dytttf.com/images/blog/202111222255600.png">
+
+
+<link rel="canonical" href="http://www.dytttf.com/2021/11/22/%E4%B8%80%E6%AC%A1uWSGI%E6%9C%8D%E5%8A%A1%E5%93%8D%E5%BA%94500%E6%8E%92%E6%9F%A5-worker%E5%8A%A0%E8%BD%BD%E9%9A%8F%E6%9C%BA%E5%A4%B1%E8%B4%A5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://www.dytttf.com/2021/11/22/%E4%B8%80%E6%AC%A1uWSGI%E6%9C%8D%E5%8A%A1%E5%93%8D%E5%BA%94500%E6%8E%92%E6%9F%A5-worker%E5%8A%A0%E8%BD%BD%E9%9A%8F%E6%9C%BA%E5%A4%B1%E8%B4%A5/","path":"2021/11/22/一次uWSGI服务响应500排查-worker加载随机失败/","title":"一次uWSGI服务响应500排查 - worker加载随机失败"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>一次uWSGI服务响应500排查 - worker加载随机失败 | Dytttf's Space</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Dytttf's Space</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">There is no one</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%8E%AA%E6%96%BD"><span class="nav-number">4.</span> <span class="nav-text">优化措施</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%9D%E8%80%83"><span class="nav-number">5.</span> <span class="nav-text">思考</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A5%E5%89%8D%E6%89%80%E4%B8%8D%E6%9B%BE%E5%85%B3%E6%B3%A8%E5%88%B0%E7%9A%84%E7%82%B9"><span class="nav-number">6.</span> <span class="nav-text">以前所不曾关注到的点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-overview">
+            <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Dytttf</p>
+  <div class="site-description" itemprop="description">https://github.com/dytttf</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+  <div class="links-of-blogroll site-overview-item animated">
+    <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://kalacloud.com/" title="https:&#x2F;&#x2F;kalacloud.com" rel="noopener" target="_blank">卡拉云低代码工具</a>
+        </li>
+    </ul>
+  </div>
+
+          </div>
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="Back to top">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+
+  <a href="https://github.com/dytttf" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://www.dytttf.com/2021/11/22/%E4%B8%80%E6%AC%A1uWSGI%E6%9C%8D%E5%8A%A1%E5%93%8D%E5%BA%94500%E6%8E%92%E6%9F%A5-worker%E5%8A%A0%E8%BD%BD%E9%9A%8F%E6%9C%BA%E5%A4%B1%E8%B4%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Dytttf">
+      <meta itemprop="description" content="https://github.com/dytttf">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dytttf's Space">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一次uWSGI服务响应500排查 - worker加载随机失败
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2021-11-22 22:15:01" itemprop="dateCreated datePublished" datetime="2021-11-22T22:15:01+08:00">2021-11-22</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">Views: </span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在一次线上问题排查中，发现 uWSGI 在某些情况下，会出现假僵尸进程的现象。</p>
+<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>服务部署很简单，常规的 Django + uWSGI 模式。</p>
+<p>uWSGI 配置如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[uwsgi]</span><br><span class="line">http = :<span class="number">8888</span></span><br><span class="line">processes = <span class="number">8</span></span><br><span class="line">threads = <span class="number">1</span></span><br><span class="line">master = true</span><br><span class="line">lazy-apps = true</span><br></pre></td></tr></table></figure>
+
+<p>在 uWSGI 的访问日志中，会夹杂一些 500 的响应，但 500 并不是因为 Django 应用代码报错产生的。</p>
+<p>而是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">--- no python application found, check your startup logs <span class="keyword">for</span> errors ---</span><br><span class="line">[pid: <span class="number">1139</span>|app: -<span class="number">1</span>|req: -<span class="number">1</span>/<span class="number">720133</span>] <span class="number">10.1</span><span class="number">.0</span><span class="number">.1</span> () &#123;<span class="number">54</span> <span class="built_in">vars</span> <span class="keyword">in</span> <span class="number">1184</span> <span class="built_in">bytes</span>&#125; [Tue Nov <span class="number">16</span> <span class="number">13</span>:<span class="number">47</span>:<span class="number">19</span> <span class="number">2021</span>] POST /api/v1/test =&gt; generated <span class="number">21</span> <span class="built_in">bytes</span> <span class="keyword">in</span> <span class="number">0</span> msecs (HTTP/<span class="number">1.0</span> <span class="number">500</span>) <span class="number">2</span> headers <span class="keyword">in</span> <span class="number">83</span> <span class="built_in">bytes</span> (<span class="number">0</span> switches on core <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后经过日志分析，发现 500 的请求都是由 uWSGI 的某两个固定子进程所处理的。</p>
+<p>uWSGI服务一共启动了8个子进程，其中有两个子进程出现了问题，导致服务接口有 1&#x2F;4的概率调用失败。</p>
+<p>那么问题来了。</p>
+<ol>
+<li><p>为什么会出现两个，而不是全部都有问题？</p>
+</li>
+<li><p>看现象是 uWSGI 的子进程的问题，为什么 uWSGI 没有自动处理这些有问题的子进程？</p>
+</li>
+</ol>
+<h1 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h1><p>针对第一个问题，经过日志分析，定位到在 500 响应第一次出现的时间点里，发生过内存不够的现象，</p>
+<p>某个请求内存不够导致了其所在 worker 的重启，但重启的时候内存还是不太够，虽然 worker 进程启</p>
+<p>动成功，但在加载 Django 应用代码的时候加载失败。如下图</p>
+<img src="https://images.dytttf.com/images/blog/202111222255600.png" title="uwsgi_reload_error.png">
+
+
+<p>此时就出现了，某些 worker 正常， 某些 worker 异常的情况。</p>
+<p>针对第二个问题，就需要去了解一下 uWSGI 的运行机制了。首先看一下在 worker 启动的时候，uWSGI 会做什么。</p>
+<p>以下代码出自 uWSGI 源码：<a target="_blank" rel="noopener" href="https://github.com/unbit/uwsgi">https://github.com/unbit/uwsgi/</a></p>
+<p>一个基本的调用链：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="string">uwsgi_init &lt;= uwsgi.main.c || core/uwsgi.c</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	-&gt; uwsgi_setup &lt;= uwsgi.c</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">		-&gt; uwsgi_worker_run</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">			-&gt; uwsgi_init_all_apps </span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">				-&gt; init_apps(uwsgi_python_init_apps) &lt;= plugins/python/python_plugin.c</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">					-&gt; init_uwsgi_app &lt;= plugins/python/pyloader.c</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">						-&gt; uwsgi_file_loader</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>关键代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// plugins/python/pyloader.c </span></span><br><span class="line"><span class="comment">// init_uwsgi_app</span></span><br><span class="line">wi-&gt;callable = up.loaders[loader](arg1);</span><br><span class="line"><span class="keyword">if</span> (!wi-&gt;callable) &#123;</span><br><span class="line">    <span class="built_in">uwsgi_log</span>(<span class="string">&quot;unable to load app %d (mountpoint=&#x27;%s&#x27;) (callable not found or import error)\n&quot;</span>, id, wi-&gt;mountpoint);</span><br><span class="line">    <span class="keyword">goto</span> doh;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line">doh:</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">PyErr_Occurred</span>())</span><br><span class="line">        <span class="built_in">PyErr_Print</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>当 uWSGI 尝试加载 python 代码时，如果加载失败，则返回 appid 为 -1 ;</p>
+<p>然后：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// core/uwsgi.c</span></span><br><span class="line"><span class="comment">// uwsgi_init_all_apps</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// no app initialized and virtualhosting enabled</span></span><br><span class="line"><span class="keyword">if</span> (uwsgi_apps_cnt == <span class="number">0</span> &amp;&amp; uwsgi.numproc &gt; <span class="number">0</span> &amp;&amp; !uwsgi.command_mode) &#123;</span><br><span class="line">    <span class="keyword">if</span> (uwsgi.need_app) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!uwsgi.lazy)</span><br><span class="line">            <span class="built_in">uwsgi_log</span>(<span class="string">&quot;*** no app loaded. GAME OVER ***\n&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (uwsgi.lazy_apps) &#123;</span><br><span class="line">            <span class="keyword">if</span> (uwsgi.master_process) &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">kill</span>(uwsgi.workers[<span class="number">0</span>].pid, SIGINT)) &#123;</span><br><span class="line">                    <span class="built_in">uwsgi_error</span>(<span class="string">&quot;kill()&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">exit</span>(UWSGI_FAILED_APP_CODE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">uwsgi_log</span>(<span class="string">&quot;*** no app loaded. going in full dynamic mode ***\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当 worker 加载 app 失败时，会根据配置项决定是直接退出还是进入 dynamic 模式（默认配置）。</p>
+<p>所以第二个问题的答案是: uWSGI 不认为这些进程是异常的，因此不作处理。</p>
+<h1 id="优化措施"><a href="#优化措施" class="headerlink" title="优化措施"></a>优化措施</h1><p>最容易想到的一个优化措施是，在加载 app 失败的时候重试几次，但查了一下 uWSGI 的配置项后，</p>
+<p>发现并没有相关选项，其实在分析代码过程中也能看出来，根本没有类似功能的代码。</p>
+<p>那么只能从现有选项上着手尝试解决了。</p>
+<p>先列一下涉及到的一些配置项：</p>
+<ul>
+<li>master: 官方文档强烈推荐开启,但关于此选项的解释又很少</li>
+</ul>
+<p>这里简单总结一下,启用 master 模式的话，uwsgi会启动 （1 + 1 + processes）个进程。其中第一个为 uWSGI主进程，第二个为 master 进程，专门用来管理 worker。之后会启动指定数量的 worker 进程。</p>
+<p>至于为啥不用主进程来管理 worker, 这个问题我还不是很清楚。</p>
+<p>master 进程的好处基本都在这里写完了：<a target="_blank" rel="noopener" href="https://uwsgi-docs-zh.readthedocs.io/zh_CN/latest/articles/TheArtOfGracefulReloading.html">https://uwsgi-docs-zh.readthedocs.io/zh_CN/latest/articles/TheArtOfGracefulReloading.html</a></p>
+<p>在 master 模式下，如果 worker 进程被 KILL，那么会自动被 master 进程重启，而非 master 模式则不会，并且 worker 进程会变成僵尸进程。</p>
+<ul>
+<li>dynamic-apps: 所谓 dynamic 模式，就是指可以在每一个请求中附加参数来指定处理该请求的 app。</li>
+</ul>
+<p>uWSGI 的多个 worker 之间是可以分别加载不同的应用代码的. 参见:<a target="_blank" rel="noopener" href="https://uwsgi-docs.readthedocs.io/en/latest/DynamicApps.html">https://uwsgi-docs.readthedocs.io/en/latest/DynamicApps.html</a></p>
+<ul>
+<li><p>lazy-apps: 简单来说就是在 worker 进程启动完成后才开始加载 app 代码，</p>
+</li>
+<li><p>lazy: 同 lazy-apps，但已废弃，不推荐使用。</p>
+</li>
+<li><p>need-app: 如果 worker 没有加载到 app, 则直接退出。</p>
+</li>
+<li><p>max-requests: 设置 worker 处理的最大请求数量, 如果超过最大值则重启 worker.</p>
+</li>
+<li><p>max-requests-delta: 防止 worker 同时到达最大值而设置的一个差异值，会将每个 worker 的 max-requests 设置为 max-requests + ( worker_id * delta )</p>
+</li>
+<li><p>min-worker-lifetime: worker 重启的最小间隔描述，默认60</p>
+</li>
+<li><p>max-worker-lifetime: worker 将会在设置的秒数之后被重启, 默认不启用</p>
+</li>
+<li><p>max-worker-lifetime-delta: 类似于 max-requests-delta </p>
+</li>
+<li><p>worker-reload-mercy: worker 在被重启前默认的最大等待时间，worker 可以在这段时间内处理尚未完成的请求.</p>
+</li>
+</ul>
+<p>第一种解决方式：</p>
+<p>&amp;ensp;&amp;ensp;暴力一些，设置 need-app 为 true, 这样当加载失败的时候直接退出 uWSGI, 不过这个依赖于服务重启策略，如果采用 docker 部署，可以采用自动重启来保证服务稳定性。</p>
+<p>第二种解决方式：</p>
+<p>&amp;ensp;&amp;ensp;优雅一些, 设置 max-worker-lifetime, 这样当出现异常 worker 时，不会让异常 worker 一直处于异常的状态。</p>
+<p>不同的方式其实适用于不同的场景。</p>
+<p>&amp;ensp;&amp;ensp;第一种方式的影响就是在重启期间完全不可用。</p>
+<p>&amp;ensp;&amp;ensp;第二种方式的影响是在 worker 异常期间有一定概率服务请求失败。</p>
+<p>单纯这么比较的话，貌似第二种稍微好一点，但第一种方式其实有很多办法做到用户完全无感知的。</p>
+<p>举个例子：</p>
+<p>&amp;ensp;&amp;ensp;在使用 k8s 进行应用部署的时候，将后端服务部署的 Deployment 中 Pod 格式设置为大于1, 并且使用 Service 来访问后端服务，</p>
+<p>这样的话，当某个后端 Pod 重启，则完全不会影响服务可用性。</p>
+<p>总结一下：没有绝对通用的策略，有的只是根据应用场景设计出来的适合的策略。</p>
+<h1 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h1><p>uWSGI 为何不提供一种模式来处理随机加载失败的情况呢？</p>
+<p>可能的原因是：</p>
+<p>1、这个场景很少，没遇到过（概率极低）</p>
+<p>2、没有很完美的处理方式，比如很简单的处理方式是加载失败时重试，可设置重试次数，重试间隔等。但这个也无法保证一定可以加载成功。</p>
+<p>3、存在其他手段，例如设置 worker 生存时间来处理。</p>
+<h1 id="以前所不曾关注到的点"><a href="#以前所不曾关注到的点" class="headerlink" title="以前所不曾关注到的点"></a>以前所不曾关注到的点</h1><p>uWSGI 其实并不是一个简单易用的 Web 服务器，参考官方文档的定义：</p>
+<blockquote>
+<p>The best definition for uWSGI is “Swiss Army Knife for your network applications”.</p>
+</blockquote>
+<p>对 uWSGI 的最好形容是网络应用的瑞士军刀，可以应对任何情况，但前提是你得很熟悉它的用法。</p>
+<p>uWSGI 并不是为 Python 而开发的，它最开始是在 Perl 语言中使用的, 而且也不叫 uWSGI.</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p>使用 uWSGI 前必读</p>
+<p>&amp;ensp;&amp;ensp;<a target="_blank" rel="noopener" href="https://uwsgi-docs.readthedocs.io/en/latest/Management.html">https://uwsgi-docs.readthedocs.io/en/latest/Management.html</a></p>
+<p>&amp;ensp;&amp;ensp;<a target="_blank" rel="noopener" href="https://uwsgi-docs.readthedocs.io/en/latest/FAQ.html?highlight=ProcessManagement#why-should-i-choose-uwsgi">https://uwsgi-docs.readthedocs.io/en/latest/FAQ.html?highlight=ProcessManagement#why-should-i-choose-uwsgi</a></p>
+<p>&amp;ensp;&amp;ensp;<a target="_blank" rel="noopener" href="https://uwsgi-docs-zh.readthedocs.io/zh_CN/latest/articles/TheArtOfGracefulReloading.html">https://uwsgi-docs-zh.readthedocs.io/zh_CN&#x2F;latest&#x2F;articles&#x2F;TheArtOfGracefulReloading.html</a></p>
+<p>github issue: </p>
+<p>&amp;ensp;&amp;ensp;<a target="_blank" rel="noopener" href="https://github.com/unbit/uwsgi/issues/2374">https://github.com/unbit/uwsgi/issues/2374</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/11/12/IMAP%E5%8D%8F%E8%AE%AE-%E4%BB%8E%E7%BD%91%E6%98%93%E9%82%AE%E7%AE%B1%E7%9A%84%E9%AA%9A%E6%93%8D%E4%BD%9C%E5%88%B0QQ%E9%82%AE%E7%AE%B1%E7%9A%84BUG/" rel="prev" title="IMAP协议-从网易邮箱的骚操作到QQ邮箱的BUG">
+                  <i class="fa fa-chevron-left"></i> IMAP协议-从网易邮箱的骚操作到QQ邮箱的BUG
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/11/30/Web%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9B%B8%E5%85%B3%E7%9A%84%E4%B8%80%E4%BA%9B%E6%A6%82%E5%BF%B5/" rel="next" title="Web服务器相关的一些概念">
+                  Web服务器相关的一些概念 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="beian"><a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">京ICP备2021028637号 </a>
+  </div>
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Dytttf</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"dytttf/dytttf.github.io","issue_term":"pathname","theme":"preferred-color-scheme"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
